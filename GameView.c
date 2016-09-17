@@ -1,40 +1,42 @@
 // GameView.c ... GameView ADT implementation
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <assert.h>
 #include "Globals.h"
 #include "Game.h"
 #include "GameView.h"
 #include "Map.h" //... if you decide to use the Map ADT
 
-#define VAMP_OR_TRAP 2
 #define TRAP 0
 #define VAMP 1
 #define MOST_RECENT 0
 #define PREVIOUS 1
 #define LOCATION_NAME_ABBRV 3
+#define VAMP_MATURES 19 // drac leaves vamp every 13 rounds, it matures in 6 more, hence 13+6=19?
 
 //helper functions
-static GameView endOfRound (GameView gameView, int currentPlayer);
 static GameView currentLocation (GameView gameView, char *locationID, int currentPlayer)
 static GameView locationUpdateInGV (GameView gameView, int locationID, int currentPlayer); // updating location in gameView
 static GameView startingPlayerLocationAndHealth (GameView gameView);
 static char *getLocationFromPastPlay(char *pastPlays, int i);
 static int playerName(char *pastPlays, int i);
-
+static GameView actions (GameView gameView, int i, int currentPlayer, char *pastPlays);
+static GameView endOfRound (GameView gameView, int currentPlayer);
 //--------------------------------
 struct gameView {
-    int globalScore; //Current game score
-    Round globalRound; //Current game Round
-    int currentTurn; //Current turn
-    PlayerID currentPlayer; //The name says it all //changed data type
-    int globalHeath[NUM_PLAYERS]; //The array for the health of the players
-    //int *trailLocation; //The array for the trail
-    //int *currentLocation; //The array for all the current locations of the players
+    int globalScore; // Current game score
+    Round globalRound; // Current game Round
+    int currentTurn; // Current turn
+    PlayerID currentPlayer; // The name says it all //changed data type
+    int globalHeath[NUM_PLAYERS]; // The array for the health of the players
+    //int *trailLocation; // The array for the trail
+    //int *currentLocation; // The array for all the current locations of the players
     LocationID trailOfLocations[NUM_PLAYERS][TRAIL_SIZE];
     LocationID location[NUM_PLAYERS];
-    int minions[NUM_MAP_LOCATIONS][VAMP_OR_TRAP]; //to keep track of all the traps etc. 
-    Map gameMap; //to have a copy of game map at all times?
+    int minions[NUM_MAP_LOCATIONS][2]; // to keep track of all the traps etc. 
+                                       // 2 storage locations, 1 for traps and 1 for vamps
+    Map gameMap; // to have a copy of game map at all times?
 };
 
 
@@ -51,17 +53,17 @@ GameView newGameView(char *pastPlays, PlayerMessage messages[])
     gameView->gameMap = newMap();
     
     int i, currPl; // i is very important as it is a counter of the pastplays string
+                   // currPl = current player
     startingPlayerLocationAndHealth(gameView);
     for (i = 0; pastPlays[i] != '\0'; i++) {
-        if (i % 8 != 0) // evry turn has 8 characters 
+        if (i % 8 != 0) // every turn has 8 characters 
             currPl = playerName(pastPlays, i); // setting current player until turn is completed
         i++;
         char *locationID = getLocationFromPastPlay(pastPlays, i); // local version of LocationID
         i++;
         currentLocation(gameView, locationID, currPlayer);
         for (; pastPlays[i] != ' '; i++)
-            // function call to the funtion which refreshes after every action
-            // function should be of the form <name>(gameView,i,currPl,pastPlays)
+            actions(gameView, i, currPl, pastPlays);
         endOfRound(gameView, currPl);
     } // above for loop was done by manually iterating on paper, it's most likely buggy AF LMAO
     return gameView;
@@ -152,33 +154,44 @@ static GameView startingPlayerLocationAndHealth (GameView gameView) {
 }
 
 / changes game state according to actions performed in the pastPlays string
-static GameView updateFromAction (GameView gameView, int i, int currentPlayer, char *pastPlays) {
-    LocationID playerLocation = (currentPlayer != PLAYER_DRACULA) ? getLocation(gameView, currentPlayer) : gameView->location[PLAYER_DRACULA];
+static GameView actions (GameView gameView, int i, int currentPlayer, char *pastPlays) {
+
+    if (currentPlayer != PLAYER_DRACULA)
+         LocationID cpLocation = getLocation(gameView, currentPlayer); // current player location
+    else
+        LocationID cpLocation = gameView->location[PLAYER_DRACULA];
     switch (pastPlays[i]) {
         case 'T':
-            if (currPlayer != PLAYER_DRACULA) {
-                gameView->health[currentPlayer] -= LIFE_LOSS_TRAP_ENCOUNTER;
-                gameView->minions[playerLocation][TRAP]--;
-                if (gameView->minions[playerLocation][TRAP] < 0)
-                    gameView->minions[playerLocation][TRAP] = 0;
+            if (currentPlayer != PLAYER_DRACULA) {
+                gameView->globalHealth[currentPlayer] -= LIFE_LOSS_TRAP_ENCOUNTER;
+                gameView->minions[cpLocation][TRAP]--;
+                if (gameView->minions[cpLocation][TRAP] < 0)
+                    gameView->minions[cpLocation][TRAP] = 0;
             } else {
-                gameView->minions[playerLocation][TRAP]++;
+                gameView->minions[cpLocation][TRAP]++;
             }
             break;
         case 'D':
-            gameView->health[PLAYER_DRACULA] -= LIFE_LOSS_HUNTER_ENCOUNTER;
-            gameView->health[currentPlayer] -= LIFE_LOSS_DRACULA_ENCOUNTER;
+            gameView->globalHealt[PLAYER_DRACULA] -= LIFE_LOSS_HUNTER_ENCOUNTER;
+            gameView->globalHealt[currentPlayer] -= LIFE_LOSS_DRACULA_ENCOUNTER;
             break;
         case 'V':
-            if (currentPlayer == PLAYER_DRACULA {
-                gameView->minions[playerLocation][VAMP]++;
+            if (currentPlayer == PLAYER_DRACULA && (i%VAMP_MATURES!=0)) {
+                gameView->minions[cpLocation][VAMP]++;
             } else if (currentPlayer != PLAYER_DRACULA) {
-                gameView->minions[playerLocation][VAMP]--;
-                if (gameView->minions[playerLocation][VAMP] < 0)
-                    gameView->minions[playerLocation][VAMP] = 0;
+                gameView->minions[cpLocation][VAMP]--;
+                if (gameView->minions[cpLocation][VAMP] < 0)
+                    gameView->minions[cpLocation][VAMP] = 0;
+            }
+            if (i%VAMP_MATURES==0){
+                LocationID lastDracLocation = gameView->trailOfLocations[PLAYER_DRACULA][5]; 
+                gameView->globalScore -= SCORE_LOSS_VAMPIRE_MATURES;
+                gameView->minions[lastDracLocation][VAMP]--;
+                    if (gameView->minions[lastDracLocation][VAMP] < 0)
+                        gameView->minions[lastDracLocation][VAMP] = 0;
             }
             break;
-        case '.':
+        case '.': // nothing has occured
             break;
         default:
             break;
@@ -189,14 +202,14 @@ static GameView updateFromAction (GameView gameView, int i, int currentPlayer, c
 // takes care of updating all values at the end of every round (mainly end of Dracula's turn)
 static GameView endOfRound (GameView gameView, int currentPlayer) {
     int locationID = gameView->location[currentPlayer];
-    if (curreentPlayer == PLAYER_DRACULA) { 
+    if (currentPlayer == PLAYER_DRACULA) { 
         gameView->globalScore -= SCORE_LOSS_DRACULA_TURN; // score decreases by 1 each time Dracula finishes a turn
         if (gameView->globalScore < 0) // score cannot be less than 0
             gameView->globalScore = 0;
         if ((validPlace(locationID) && idToType(locationID) == SEA) || locationID == SEA_UNKNOWN)
-            gameView->health[currPlayer] -= LIFE_LOSS_SEA; // Dracula loses 2 blood pts if he ends his turn at sea
+            gameView->globalHealth[currentPlayer] -= LIFE_LOSS_SEA; // Dracula loses 2 blood pts if he ends his turn at sea
         else if (locationID == CASTLE_DRACULA)
-            gameView->health[currPlayer] += LIFE_GAIN_CASTLE_DRACULA; // Dracula gains 10 blood pts if he ends his turn at Castle Dracula
+            gameView->globalHealth[currentPlayer] += LIFE_GAIN_CASTLE_DRACULA; // Dracula gains 10 blood pts if he ends his turn at Castle Dracula
                
         gameView->globalRound++; //Dracula finishes his turn, increment the round no.
         gameView->currentPlayer = PLAYER_LORD_GODALMING;
@@ -204,9 +217,9 @@ static GameView endOfRound (GameView gameView, int currentPlayer) {
         gameView->currentPlayer++; // Post increment so current player gets used ones before it changes
                                    // Incrementing before loop so that even though it gets used, it gets incremented for next time?
         if (locationID == gameView->trail[currentPlayer][PREVIOUS]) {
-            gameView->health[currentPlayer] += LIFE_GAIN_REST;  // Hunter gains 4 life pts if they end their current turn in the location of their previous turn
-            if (gameView->health[currentPlayer] > GAME_START_HUNTER_LIFE_POINTS) // Hunter's health is not permitted to exceed 9 life pts
-                gameView->health[currentPlayer] = GAME_START_HUNTER_LIFE_POINTS;
+            gameView->globalHealth[currentPlayer] += LIFE_GAIN_REST;  // Hunter gains 4 life pts if they end their current turn in the location of their previous turn
+            if (gameView->globalHealth[currentPlayer] > GAME_START_HUNTER_LIFE_POINTS) // Hunter's health is not permitted to exceed 9 life pts
+                gameView->globalHealth[currentPlayer] = GAME_START_HUNTER_LIFE_POINTS;
         }
     }
     return gameView; // Return final changes to the game after every round
