@@ -16,7 +16,7 @@
 
 //helper functions
 static GameView endOfRound (GameView gameView, int currentPlayer);
-static GameView currentLocation (GameView gameView, char *locationID, int currPlayer)
+static GameView currentLocation (GameView gameView, char *locationID, int currentPlayer)
 static GameView locationUpdateInGV (GameView gameView, int locationID, int currentPlayer); // updating location in gameView
 static GameView startingPlayerLocationAndHealth (GameView gameView);
 static char *getLocationFromPastPlay(char *pastPlays, int i);
@@ -131,6 +131,7 @@ static GameView locationUpdateInGV  (GameView gameView, int locationID, int curr
     int i;
     for (i = TRAIL_SIZE; i > 0; i--) // may have to start from Trail_size -1 but can't be sure without testing
         gameView->trailOfLocations[currentPlayer][i] = gameView->trailOfLocations[currPlayer][i-1];
+        
     gameView->trailofLocations[currentPlayer][i] = locationID;
     gameView->location[currentPlayer] = locationID;
     return gameView;
