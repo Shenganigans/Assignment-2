@@ -151,6 +151,41 @@ static GameView startingPlayerLocationAndHealth (GameView gameView) {
     return gameView;
 }
 
+/ changes game state according to actions performed in the pastPlays string
+static GameView updateFromAction (GameView gameView, int i, int currentPlayer, char *pastPlays) {
+    LocationID playerLocation = (currentPlayer != PLAYER_DRACULA) ? getLocation(gameView, currentPlayer) : gameView->location[PLAYER_DRACULA];
+    switch (pastPlays[i]) {
+        case 'T':
+            if (currPlayer != PLAYER_DRACULA) {
+                gameView->health[currentPlayer] -= LIFE_LOSS_TRAP_ENCOUNTER;
+                gameView->minions[playerLocation][TRAP]--;
+                if (gameView->minions[playerLocation][TRAP] < 0)
+                    gameView->minions[playerLocation][TRAP] = 0;
+            } else {
+                gameView->minions[playerLocation][TRAP]++;
+            }
+            break;
+        case 'D':
+            gameView->health[PLAYER_DRACULA] -= LIFE_LOSS_HUNTER_ENCOUNTER;
+            gameView->health[currentPlayer] -= LIFE_LOSS_DRACULA_ENCOUNTER;
+            break;
+        case 'V':
+            if (currentPlayer == PLAYER_DRACULA {
+                gameView->minions[playerLocation][VAMP]++;
+            } else if (currentPlayer != PLAYER_DRACULA) {
+                gameView->minions[playerLocation][VAMP]--;
+                if (gameView->minions[playerLocation][VAMP] < 0)
+                    gameView->minions[playerLocation][VAMP] = 0;
+            }
+            break;
+        case '.':
+            break;
+        default:
+            break;
+    }
+    return gameView;
+}
+
 // takes care of updating all values at the end of every round (mainly end of Dracula's turn)
 static GameView endOfRound (GameView gameView, int currentPlayer) {
     int locationID = gameView->location[currentPlayer];
