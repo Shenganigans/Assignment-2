@@ -12,10 +12,15 @@
 #define VAMP 1
 #define MOST_RECENT 0
 #define PREVIOUS 1
+#define LOCATION_NAME_ABBRV 3
 
 //helper functions
 static GameView endOfRound (GameView gameView, int currentPlayer);
-
+static GameView currentLocation (GameView gameView, char *locationID, int currPlayer)
+static GameView locationUpdateInGV (GameView gameView, int locationID, int currentPlayer); // updating location in gameView
+static GameView startingPlayerLocationAndHealth (GameView gameView);
+static char *getLocationFromPastPlay(char *pastPlays, int i);
+static int playerName(char *pastPlays, int i);
 
 //--------------------------------
 struct gameView {
@@ -23,7 +28,7 @@ struct gameView {
     Round globalRound; //Current game Round
     int currentTurn; //Current turn
     PlayerID currentPlayer; //The name says it all //changed data type
-    int *globalHeath; //The array for the health of the players
+    int globalHeath[NUM_PLAYERS]; //The array for the health of the players
     //int *trailLocation; //The array for the trail
     //int *currentLocation; //The array for all the current locations of the players
     LocationID trailOfLocations[NUM_PLAYERS][TRAIL_SIZE];
@@ -36,17 +41,112 @@ struct gameView {
 // Creates a new GameView to summarise the current state of the game
 GameView newGameView(char *pastPlays, PlayerMessage messages[])
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
     GameView gameView = malloc(sizeof(struct gameView));
     //gameView->globalHeath = malloc(sizeof(NUM_PLAYERS));// the first line of malloc automatically creates space for this, hence futile?
     //gameView->trailOfLocations = malloc(sizeof(TRAIL_SIZE));// the first line of malloc automatically creates space for this, hence futile?
     //gameView->currentLocation = malloc(sizeof(NUM_PLAYERS));// the first line of malloc automatically creates space for this, hence futile?
-    // new stuff here
     gameView->globalRound = 0;
     gameView->globalScore = GAME_START_SCORE;
     gameView->currentPlayer = PLAYER_LORD_GODALMING;
     gameView->gameMap = newMap();
-    //-------------
+    
+    int i, currPl; // i is very important as it is a counter of the pastplays string
+    startingPlayerLocationAndHealth(gameView);
+    for (i = 0; pastPlays[i] != '\0'; i++) {
+        if (i % 8 != 0) // evry turn has 8 characters 
+            currPl = playerName(pastPlays, i); // setting current player until turn is completed
+        i++;
+        char *locationID = getLocationFromPastPlay(pastPlays, i); // local version of LocationID
+        i++;
+        currentLocation(gameView, locationID, currPlayer);
+        for (; pastPlays[i] != ' '; i++)
+            // function call to the funtion which refreshes after every action
+            // function should be of the form <name>(gameView,i,currPl,pastPlays)
+        endOfRound(gameView, currPl);
+    } // above for loop was done by manually iterating on paper, it's most likely buggy AF LMAO
+    return gameView;
+}
+// extracts the player's location from the pastPlays string and returns the location's ID no.
+// uses the pastPlays string to get player location and returns it
+static char *getLocationFromPastPlay(char *pastPlays, int i) {
+    char *temp = malloc(LOCATION_NAME_ABBRV*sizeof(char)); // temp array to store the immediate location
+    temp[0] = pastPlays[i];
+    temp[1] = pastPlays[i+1];
+    temp[2] = '\0';
+    return temp;
+}
+
+// checks what player has performed the actions so we can update the game state accordingly
+static int playerName(char *pastPlays, int i) {
+    switch (pastPlays[i]) {
+        case 'G': return PLAYER_LORD_GODALMING; 
+                  break;
+        case 'S': return PLAYER_DR_SEWARD; 
+                  break;
+        case 'H': return PLAYER_VAN_HELSING;
+                  break;
+        case 'M': return PLAYER_MINA_HARKER; 
+                  break;
+        case 'D': return PLAYER_DRACULA; 
+                  break;
+        default: return 0;
+    }
+}
+
+// updates player's locations ("C?" and "S?" only show up in Dracula's turn)
+static GameView currentLocation (GameView gameView, char *locationID, int currentPlayer) {
+    if (currentPlayer == PLAYER_DRACULA) {
+        if (strcmp(locationID, "C?") == 0)
+            locationUpdateInGV(gameView, CITY_UNKNOWN, currentPlayer);
+        else if (strcmp(locationID, "S?") == 0)
+            locationUpdateInGV(gameView, SEA_UNKNOWN, currentPlayer);
+        else if (strcmp(locationID, "HI") == 0)
+            locationUpdateInGV(gameView, HIDE, currentPlayer);
+        else if (locationID[0] == 'D') {
+            switch (locationID[1]) {
+                case '1': locationUpdateInGV(gameView, DOUBLE_BACK_1, currentPlayer); 
+                          break;
+                case '2': locationUpdateInGV(gameView, DOUBLE_BACK_2, currentPlayer);
+                          break;
+                case '3': locationUpdateInGV(gameView, DOUBLE_BACK_3, currentPlayer); 
+                          break;
+                case '4': locationUpdateInGV(gameView, DOUBLE_BACK_4, currentPlayer); 
+                          break;
+                case '5': locationUpdateInGV(gameView, DOUBLE_BACK_5, currentPlayer);
+                          break;
+                default: break;
+            }
+            int i = locationID[1] - '0';
+            gameView->location[currentPlayer] = gameView->trailOfLocations[currentPlayer][i];
+        } else if (strcmp(locationID, "TP") == 0)
+            locationUpdateInGV(gameView, CASTLE_DRACULA, currentPlayer);
+        else
+            locationUpdateInGV(gameView, abbrevToID(locationID), currentPlayer);
+    } else {
+        locationUpdateInGV(gameView, abbrevToID(locationID), currentPlayer);
+    }
+    return gameView;
+}
+static GameView locationUpdateInGV  (GameView gameView, int locationID, int currentPlayer) {
+    int i;
+    for (i = TRAIL_SIZE; i > 0; i--) // may have to start from Trail_size -1 but can't be sure without testing
+        gameView->trailOfLocations[currentPlayer][i] = gameView->trailOfLocations[currPlayer][i-1];
+    gameView->trailofLocations[currentPlayer][i] = locationID;
+    gameView->location[currentPlayer] = locationID;
+    return gameView;
+}
+
+// initialises player's health and locations at the beginning of the game
+static GameView startingPlayerLocationAndHealth (GameView gameView) {
+    int i, j;
+    for (i = 0; i < NUM_PLAYERS; i++) {
+        if (i == PLAYER_DRACULA)
+            gameView->globalHealth[i] = GAME_START_BLOOD_POINTS;
+        else 
+            gameView->globalHealth[i] = GAME_START_HUNTER_LIFE_POINTS;
+        for (j = 0; j < TRAIL_SIZE; j++)
+            gameView->trailOfLocations[i][j] = UNKNOWN_LOCATION;
+    }
     return gameView;
 }
 
@@ -62,7 +162,7 @@ static GameView endOfRound (GameView gameView, int currentPlayer) {
         else if (locationID == CASTLE_DRACULA)
             gameView->health[currPlayer] += LIFE_GAIN_CASTLE_DRACULA; // Dracula gains 10 blood pts if he ends his turn at Castle Dracula
                
-        gameView->round++; //Dracula finishes his turn, increment the round no.
+        gameView->globalRound++; //Dracula finishes his turn, increment the round no.
         gameView->currentPlayer = PLAYER_LORD_GODALMING;
     } else {
         gameView->currentPlayer++; // Post increment so current player gets used ones before it changes
@@ -76,6 +176,7 @@ static GameView endOfRound (GameView gameView, int currentPlayer) {
     return gameView; // Return final changes to the game after every round
 }
 
+
 // Frees all memory previously allocated for the GameView toBeDeleted
 void disposeGameView(GameView toBeDeleted)
 {
@@ -83,7 +184,7 @@ void disposeGameView(GameView toBeDeleted)
     /*free(toBeDeleted->globalHeath); 
     free(toBeDeleted->trailLocation);
     free(toBeDeleted->currentLocation);*/
-    free(toBeDeleted); // we don't need the above three lines, just this will free everything lol
+    free(toBeDeleted); // we don't need the above three lines, just this will free everything LOL
 }
 
 
