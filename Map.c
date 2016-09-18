@@ -37,12 +37,26 @@ LocationID *adjacencyChecker(VList L, LocationID v, PlayerID player, Round round
     if(player == 4 && curr->type == 2) continue;
     if((player + roundN)%0) continue;
     //TODO cater for the other train possibilities
+    //TODO account for repeted entries
+    //TODO Check the road rail and sea parameters are TRUE
+    //TODO include 'from' in array
     if(player == 4 && curr->v == ST_JOSEPH_AND_ST_MARYS) continue;
     Conn[numLocCount]=curr->v;
     numLocCount++;
 
   }
   return Conn;
+//connectedLocations() returns an array of LocationID that represent
+//   all locations that are connected to the given LocationID.
+// road, rail and sea are connections should only be considered
+//   if the road, rail, sea parameters are TRUE.
+// The size of the array is stored in the variable pointed to by numLocations
+// The array can be in any order but must contain unique entries
+// Your function must take into account the round and player id for rail travel
+// Your function must take into account that Dracula can't move to
+//   the hospital or travel by rail but need not take into account Dracula's trail
+// The destination 'from' should be included in the array
+
 }
 // Create a new empty graph (for a map)
 // #Vertices always same as NUM_PLACES
