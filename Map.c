@@ -23,7 +23,27 @@ struct MapRep {
 };
 
 static void addConnections(Map);
+LocationID *adjacencyChecker(VList L, LocationID v, PlayerID player, Round roundN, int *numLocations){
+  int i = 0;
+  int count = 0;
+  int numLocCount = 0;
+  vNode curr = L[v][i];
+  while (curr->next != NULL){
+    count++;
+    curr = curr->next;
+  }
+  LocationID *Conns = malloc(sizeof(LocationID)*count);
+  for(i=0; i <= count; i++){
+    if(player == 4 && curr->type == 2) continue;
+    if((player + roundN)%0) continue;
+    //TODO cater for the other train possibilities
+    if(player == 4 && curr->v == ST_JOSEPH_AND_ST_MARYS) continue;
+    Conn[numLocCount]=curr->v;
+    numLocCount++;
 
+  }
+  return Conn;
+}
 // Create a new empty graph (for a map)
 // #Vertices always same as NUM_PLACES
 Map newMap()
