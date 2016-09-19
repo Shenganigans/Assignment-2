@@ -33,15 +33,22 @@ LocationID *adjacencyChecker(VList L, LocationID v, PlayerID player, Round round
     curr = curr->next;
   }
   LocationID *Conns = malloc(sizeof(LocationID)*count);
-  for(i=0; i <= count; i++){
+  Conn[0]=v;
+  for(i=1; i <= count; i++){
     if(player == 4 && curr->type == 2) continue;
     if((player + roundN)%0) continue;
     //TODO cater for the other train possibilities
-    //TODO account for repeted entries
+    
     //TODO Check the road rail and sea parameters are TRUE
-    //TODO include 'from' in array
+
     if(player == 4 && curr->v == ST_JOSEPH_AND_ST_MARYS) continue;
-    Conn[numLocCount]=curr->v;
+    int repeat=FALSE;
+    for(int j =0; j<numLocCount; j++){
+      if(Conn[j]==Curr->v){
+        repeat = TRUE;
+      }
+    }
+    if(repeat == FALSE) Conn[numLocCount]=curr->v;
     numLocCount++;
 
   }
