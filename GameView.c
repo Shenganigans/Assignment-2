@@ -261,7 +261,7 @@ int getScore(GameView currentView)
 // Get the current health points for a given player
 int getHealth(GameView currentView, PlayerID player)
 {
-    return currentView->globalHeath[player];
+    return currentView->globalHealth[player];
 }
 
 // Get the current location id of a given player
