@@ -8,7 +8,8 @@
 #include "Map.h"
 #include "Places.h"
 
-//typedef struct vNode *VList;
+
+typedef struct vNode *VList;
 
 struct vNode {
    LocationID  v;    // ALICANTE, etc
@@ -27,32 +28,32 @@ LocationID *adjacencyChecker(VList L, LocationID v, PlayerID player, Round round
   int i = 0;
   int count = 0;
   int numLocCount = 0;
-  vList curr = L[v][i];
+  VList curr = L[v][i];
   while (curr->next != NULL){
     count++;
     curr = curr->next;
   }
-  LocationID *Conns = malloc(sizeof(LocationID)*count);
-  Conn[0]=v;
+  LocationID *conns = malloc(sizeof(LocationID)*count);
+  conns[0]=v;
   for(i=1; i <= count; i++){
     if(player == 4 && curr->type == 2) continue;
-    if((player + roundN)%0) continue;
-    //TODO cater for the other train possibilitieseas
-    
-    //TODO Check the road rail and  parameters are TRUE
+    if((player + roundN) % 0) continue;
+    //TODO cater for the other train possibilities
+
+    //TODO Check the road rail and sea parameters are TRUE
 
     if(player == 4 && curr->v == ST_JOSEPH_AND_ST_MARYS) continue;
     int repeat=FALSE;
     for(int j =0; j<numLocCount; j++){
-      if(Conn[j]==Curr->v){
+      if(conns[j]==curr->v){
         repeat = TRUE;
       }
     }
-    if(repeat == FALSE) Conn[numLocCount]=curr->v;
+    if(repeat == FALSE) conns[numLocCount]=curr->v;
     numLocCount++;
 
   }
-  return Conn;
+  return conns;
 //connectedLocations() returns an array of LocationID that represent
 //   all locations that are connected to the given LocationID.
 // road, rail and sea are connections should only be considered
