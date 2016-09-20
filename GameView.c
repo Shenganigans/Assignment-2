@@ -156,7 +156,7 @@ static GameView startingPlayerLocationAndHealth (GameView gameView) {
 
 // changes game state according to actions performed in the pastPlays string
 static GameView actions (GameView gameView, int i, int currentPlayer, char *pastPlays) {
-
+    LocationID cpLocation = UNKNOWN_LOCATION;
     if (currentPlayer != PLAYER_DRACULA)
         LocationID cpLocation = getLocation(gameView, currentPlayer); // current player location
     else
