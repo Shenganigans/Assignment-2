@@ -4,6 +4,7 @@
 #define MAP_H
 
 #include "Places.h"
+#include "Globals.h"
 
 typedef struct vNode *VList;
 typedef struct edge{
