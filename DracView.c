@@ -7,28 +7,28 @@
 #include "GameView.h"
 #include "DracView.h"
 // #include "Map.h" ... if you decide to use the Map ADT
-     
+
 struct dracView {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    int hello;
+    GameView draculaView;
 };
-     
+
 
 // Creates a new DracView to summarise the current state of the game
 DracView newDracView(char *pastPlays, PlayerMessage messages[])
 {
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
     DracView dracView = malloc(sizeof(struct dracView));
-    dracView->hello = 42;
+    dracView->draculaView = newGameView(char *pastPlays, PlayerMessage messages[]);
     return dracView;
 }
-     
-     
+
+
 // Frees all memory previously allocated for the DracView toBeDeleted
 void disposeDracView(DracView toBeDeleted)
 {
     //COMPLETE THIS IMPLEMENTATION
-    free( toBeDeleted );
+    free(toBeDeleted->draculaView);
+    free(toBeDeleted);
 }
 
 
@@ -37,29 +37,25 @@ void disposeDracView(DracView toBeDeleted)
 // Get the current round
 Round giveMeTheRound(DracView currentView)
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return 0;
+    return (getRound(currentView->draculaView));
 }
 
 // Get the current score
 int giveMeTheScore(DracView currentView)
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return 0;
+    return (getScore(currentView->draculaView));
 }
 
 // Get the current health points for a given player
 int howHealthyIs(DracView currentView, PlayerID player)
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return 0;
+    return (getHealth(currentView->draculaView, player));
 }
 
 // Get the current location id of a given player
 LocationID whereIs(DracView currentView, PlayerID player)
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return 0;
+    return (getLocation(currentView->draculaView, player));
 }
 
 // Get the most recent move of a given player
@@ -84,7 +80,7 @@ void whatsThere(DracView currentView, LocationID where,
 void giveMeTheTrail(DracView currentView, PlayerID player,
                             LocationID trail[TRAIL_SIZE])
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+    getHistory(currentView->draculaView, player, trail[TRAIL_SIZE]);
 }
 
 //// Functions that query the map to find information about connectivity
@@ -92,14 +88,17 @@ void giveMeTheTrail(DracView currentView, PlayerID player,
 // What are my (Dracula's) possible next moves (locations)
 LocationID *whereCanIgo(DracView currentView, int *numLocations, int road, int sea)
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return NULL;
+    return (*connectedLocations(currentView->draculaView, *numLocations,
+                                 (getLocation(currentView->draculaView, PLAYER_DRACULA)), PLAYER_DRACULA , (Round(currentView->draculaView)),
+                                 road, FALSE, sea));
+
 }
 
 // What are the specified player's next possible moves
 LocationID *whereCanTheyGo(DracView currentView, int *numLocations,
                            PlayerID player, int road, int rail, int sea)
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return NULL;
+  return (*connectedLocations(currentView->draculaView, *numLocations,
+                               (getLocation(currentView->draculaView, player)), player , (Round(currentView->draculaView)),
+                               road, rail, sea));
 }
