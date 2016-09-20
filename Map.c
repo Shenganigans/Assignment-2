@@ -8,7 +8,7 @@
 #include "Map.h"
 #include "Places.h"
 
-typedef struct vNode *VList;
+//typedef struct vNode *VList;
 
 struct vNode {
    LocationID  v;    // ALICANTE, etc
