@@ -153,7 +153,7 @@ static GameView startingPlayerLocationAndHealth (GameView gameView) {
     return gameView;
 }
 
-/ changes game state according to actions performed in the pastPlays string
+// changes game state according to actions performed in the pastPlays string
 static GameView actions (GameView gameView, int i, int currentPlayer, char *pastPlays) {
 
     if (currentPlayer != PLAYER_DRACULA)
