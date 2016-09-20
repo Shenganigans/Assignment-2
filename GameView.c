@@ -161,6 +161,7 @@ static GameView actions (GameView gameView, int i, int currentPlayer, char *past
         LocationID cpLocation = getLocation(gameView, currentPlayer); // current player location
     else
         LocationID cpLocation = gameView->location[PLAYER_DRACULA];
+	
     switch (pastPlays[i]) {
         case 'T':
             if (currentPlayer != PLAYER_DRACULA) {
@@ -173,13 +174,14 @@ static GameView actions (GameView gameView, int i, int currentPlayer, char *past
             }
             break;
         case 'D':
-            gameView->globalHealt[PLAYER_DRACULA] -= LIFE_LOSS_HUNTER_ENCOUNTER;
-            gameView->globalHealt[currentPlayer] -= LIFE_LOSS_DRACULA_ENCOUNTER;
+            gameView->globalHealth[PLAYER_DRACULA] -= LIFE_LOSS_HUNTER_ENCOUNTER;
+            gameView->globalHealth[currentPlayer] -= LIFE_LOSS_DRACULA_ENCOUNTER;
             break;
-        case 'V
-            if (currentPlayer == PLAYER_DRA':CULA && (i%VAMP_MATURES!=0)) {
+        case 'V' :
+            if (currentPlayer == PLAYER_DRACULA && (i%VAMP_MATURES!=0)) {
                 gameView->minions[cpLocation][VAMP]++;
-            } else if (currentPlayer != PLAYER_DRACULA) {
+            } 
+			if (currentPlayer != PLAYER_DRACULA) {
                 gameView->minions[cpLocation][VAMP]--;
                 if (gameView->minions[cpLocation][VAMP] < 0)
                     gameView->minions[cpLocation][VAMP] = 0;
