@@ -5,6 +5,7 @@
 
 #include "Places.h"
 
+typedef struct vNode *VList;
 typedef struct edge{
     LocationID  start;
     LocationID  end;
