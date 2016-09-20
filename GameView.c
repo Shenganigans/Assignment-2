@@ -16,7 +16,7 @@
 #define VAMP_MATURES 19 // drac leaves vamp every 13 rounds, it matures in 6 more, hence 13+6=19?
 
 //helper functions
-static GameView currentLocation (GameView gameView, char *locationID, int currentPlayer)
+static GameView currentLocation (GameView gameView, char *locationID, int currentPlayer);
 static GameView locationUpdateInGV (GameView gameView, int locationID, int currentPlayer); // updating location in gameView
 static GameView startingPlayerLocationAndHealth (GameView gameView);
 static char *getLocationFromPastPlay(char *pastPlays, int i);
