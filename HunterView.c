@@ -10,9 +10,9 @@
 
 #define STARTING_ROUND 0
 #define NO_OF_ACTIONS_PER_TURN 8
-//366 is mai Dracula turns
-#define MAi_TURNS (366*5)
-#define MAi_LENGTH ( MAi_TURNS * (NO_OF_ACTIONS_PER_TURN + 1) )
+//366 is MAX Dracula turns
+#define MAX_TURNS (366*5)
+#define MAX_LENGTH ( MAX_TURNS * (NO_OF_ACTIONS_PER_TURN + 1) )
      
 struct hunterView {
      GameView hunter;
@@ -33,7 +33,7 @@ HunterView newHunterView(char *pastPlays, PlayerMessage messages[])
         hunterView->trailLocation[i] = UNKNOWN_LOCATION;
     }
 
-    int past = strnlen(pastPlays, MAi_LENGTH);
+    int past = strnlen(pastPlays, MAX_LENGTH);
 
     for( i = 0 ; i < past ; i += NO_OF_ACTIONS_PER_TURN){
         PlayerID currPlayer = ( (i/(NO_OF_ACTIONS_PER_TURN)) % NUM_PLAYERS);
