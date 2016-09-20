@@ -27,7 +27,7 @@ LocationID *adjacencyChecker(VList L, LocationID v, PlayerID player, Round round
   int i = 0;
   int count = 0;
   int numLocCount = 0;
-  vNode curr = L[v][i];
+  vList curr = L[v][i];
   while (curr->next != NULL){
     count++;
     curr = curr->next;
@@ -37,9 +37,9 @@ LocationID *adjacencyChecker(VList L, LocationID v, PlayerID player, Round round
   for(i=1; i <= count; i++){
     if(player == 4 && curr->type == 2) continue;
     if((player + roundN)%0) continue;
-    //TODO cater for the other train possibilities
+    //TODO cater for the other train possibilitieseas
     
-    //TODO Check the road rail and sea parameters are TRUE
+    //TODO Check the road rail and  parameters are TRUE
 
     if(player == 4 && curr->v == ST_JOSEPH_AND_ST_MARYS) continue;
     int repeat=FALSE;
