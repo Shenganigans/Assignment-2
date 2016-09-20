@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <strings.h>
 #include <assert.h>
 #include "Globals.h"
 #include "Game.h"
@@ -29,7 +30,7 @@ struct gameView {
     Round globalRound; // Current game Round
     int currentTurn; // Current turn
     PlayerID currentPlayer; // The name says it all //changed data type
-    int globalHeath[NUM_PLAYERS]; // The array for the health of the players
+    int globalHealth[NUM_PLAYERS]; // The array for the health of the players
     //int *trailLocation; // The array for the trail
     //int *currentLocation; // The array for all the current locations of the players
     LocationID trailOfLocations[NUM_PLAYERS][TRAIL_SIZE];
@@ -61,7 +62,7 @@ GameView newGameView(char *pastPlays, PlayerMessage messages[])
         i++;
         char *locationID = getLocationFromPastPlay(pastPlays, i); // local version of LocationID
         i++;
-        currentLocation(gameView, locationID, currPlayer);
+        currentLocation(gameView, locationID, currPl);
         for (; pastPlays[i] != ' '; i++)
             actions(gameView, i, currPl, pastPlays);
         endOfRound(gameView, currPl);
@@ -132,9 +133,9 @@ static GameView currentLocation (GameView gameView, char *locationID, int curren
 static GameView locationUpdateInGV  (GameView gameView, int locationID, int currentPlayer) {
     int i;
     for (i = TRAIL_SIZE; i > 0; i--) // may have to start from Trail_size -1 but can't be sure without testing
-        gameView->trailOfLocations[currentPlayer][i] = gameView->trailOfLocations[currPlayer][i-1];
+        gameView->trailOfLocations[currentPlayer][i] = gameView->trailOfLocations[currentPlayer][i-1];
         
-    gameView->trailofLocations[currentPlayer][i] = locationID;
+    gameView->trailOfLocations[currentPlayer][i] = locationID;
     gameView->location[currentPlayer] = locationID;
     return gameView;
 }
@@ -157,7 +158,7 @@ static GameView startingPlayerLocationAndHealth (GameView gameView) {
 static GameView actions (GameView gameView, int i, int currentPlayer, char *pastPlays) {
 
     if (currentPlayer != PLAYER_DRACULA)
-         LocationID cpLocation = getLocation(gameView, currentPlayer); // current player location
+        LocationID cpLocation = getLocation(gameView, currentPlayer); // current player location
     else
         LocationID cpLocation = gameView->location[PLAYER_DRACULA];
     switch (pastPlays[i]) {
@@ -175,8 +176,8 @@ static GameView actions (GameView gameView, int i, int currentPlayer, char *past
             gameView->globalHealt[PLAYER_DRACULA] -= LIFE_LOSS_HUNTER_ENCOUNTER;
             gameView->globalHealt[currentPlayer] -= LIFE_LOSS_DRACULA_ENCOUNTER;
             break;
-        case 'V':
-            if (currentPlayer == PLAYER_DRACULA && (i%VAMP_MATURES!=0)) {
+        case 'V
+            if (currentPlayer == PLAYER_DRA':CULA && (i%VAMP_MATURES!=0)) {
                 gameView->minions[cpLocation][VAMP]++;
             } else if (currentPlayer != PLAYER_DRACULA) {
                 gameView->minions[cpLocation][VAMP]--;
@@ -216,7 +217,7 @@ static GameView endOfRound (GameView gameView, int currentPlayer) {
     } else {
         gameView->currentPlayer++; // Post increment so current player gets used ones before it changes
                                    // Incrementing before loop so that even though it gets used, it gets incremented for next time?
-        if (locationID == gameView->trail[currentPlayer][PREVIOUS]) {
+        if (locationID == gameView->trailOfLocations[currentPlayer][PREVIOUS]) {
             gameView->globalHealth[currentPlayer] += LIFE_GAIN_REST;  // Hunter gains 4 life pts if they end their current turn in the location of their previous turn
             if (gameView->globalHealth[currentPlayer] > GAME_START_HUNTER_LIFE_POINTS) // Hunter's health is not permitted to exceed 9 life pts
                 gameView->globalHealth[currentPlayer] = GAME_START_HUNTER_LIFE_POINTS;
