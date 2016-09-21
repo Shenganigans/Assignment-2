@@ -8,9 +8,6 @@
 #include "Map.h"
 #include "Places.h"
 
-
-typedef struct vNode *VList;
-
 struct vNode {
    LocationID  v;    // ALICANTE, etc
    TransportID type; // ROAD, RAIL, BOAT
@@ -23,37 +20,14 @@ struct MapRep {
    VList connections[NUM_MAP_LOCATIONS]; // array of lists
 };
 
-static void addConnections(Map);
-LocationID *adjacencyChecker(VList L, LocationID v, PlayerID player, Round roundN, int *numLocations){
-  int i = 0;
-  int count = 0;
-  int numLocCount = 0;
-  VList curr = L[v][i];
-  while (curr->next != NULL){
-    count++;
-    curr = curr->next;
-  }
-  LocationID *conns = malloc(sizeof(LocationID)*count);
-  conns[0]=v;
-  for(i=1; i <= count; i++){
-    if(player == 4 && curr->type == 2) continue;
-    if((player + roundN) % 0) continue;
-    //TODO cater for the other train possibilities
 
-    //TODO Check the road rail and sea parameters are TRUE
+static void addSeaCities(LocationID sea, int *index, LocationID *connecs, Map m);
+static void breadthSearch(int depth, LocationID station, int *index,
+                          LocationID *connecs, Map m);
 
-    if(player == 4 && curr->v == ST_JOSEPH_AND_ST_MARYS) continue;
-    int repeat=FALSE;
-    for(int j =0; j<numLocCount; j++){
-      if(conns[j]==curr->v){
-        repeat = TRUE;
-      }
-    }
-    if(repeat == FALSE) conns[numLocCount]=curr->v;
-    numLocCount++;
+static int hasSeen(LocationID* connections, int index, LocationID to);
+static void addConnections(Map g);
 
-  }
-  return conns;
 //connectedLocations() returns an array of LocationID that represent
 //   all locations that are connected to the given LocationID.
 // road, rail and sea are connections should only be considered
@@ -65,7 +39,8 @@ LocationID *adjacencyChecker(VList L, LocationID v, PlayerID player, Round round
 //   the hospital or travel by rail but need not take into account Dracula's trail
 // The destination 'from' should be included in the array
 
-}
+
+
 // Create a new empty graph (for a map)
 // #Vertices always same as NUM_PLACES
 Map newMap()
@@ -175,6 +150,87 @@ int numE(Map g, TransportID type)
     }
     return nE;
 }
+
+// *************************
+LocationID *connecLocations(GameView currentView, int *numLocations,
+                               LocationID from, PlayerID player, Round round,
+                               int road, int rail, int sea)
+{
+    LocationID *connecs = malloc((NUM_MAP_LOCATIONS)*(sizeof(LocationID))); //create array
+    Map m = newMap();
+    int depth = (player + round)%4;
+    if(player == PLAYER_DRACULA) rail = FALSE; // Dracula cannot move by rail
+    if(depth == 0) rail = FALSE; // no rail permitted
+
+    VList curr = m->connections[from]; // points to beginning of from list
+    int index = 0;
+    connecs[index] = from;
+
+    while(curr != NULL){ //for all immediately adjacent
+      if(hasSeen(connecs, index, curr->v) == TRUE){
+        // do nothing --already seen
+      } else {
+        if((curr->type == BOAT && sea == FALSE)||
+           (curr->type == RAIL && rail == FALSE)||
+           (curr->type == ROAD && road == FALSE)||
+           (player == PLAYER_DRACULA && curr->v == ST_JOSEPH_AND_ST_MARYS)){
+          // do nothing --transport type is disabled
+        } else {
+          connecs[++index] = curr->v; // add to seen/connections
+          if(idToType(curr->v)==SEA){
+            // add sea cities
+            addSeaCities(curr->v, &index, connecs, m);
+          }
+          if(curr->type == RAIL && depth > 1){
+            // breadth search for rail reacheable cities
+            breadthSearch(depth, curr->v, &index, connecs, m);
+          }
+        }
+      }
+      curr = curr->next;
+    }
+
+    connecs[++index] = -1;
+    *numLocations = index;
+    return connecs;
+}
+
+static void addSeaCities(LocationID sea, int *index, LocationID *connecs, Map m){
+  VList curr = m->connections[sea];
+  while(curr!= NULL){
+    if(!hasSeen(connecs, *index, curr->v)){
+      if(idToType(curr->v)!=SEA) connecs[++(*index)] = curr->v; // add to seen
+    }
+    curr = curr->next;
+  }
+}
+
+static void breadthSearch(int depth, LocationID station, int *index,
+                          LocationID *connecs, Map m){
+  // pre-condition that depth will be 2 or 3
+  VList curr = m->connections[station];
+  while(curr != NULL){
+    if(curr->type == RAIL){
+      if(!hasSeen(connecs, *index, curr->v)){
+        connecs[++(*index)] = curr->v; //depth 2
+        if(depth == 3) breadthSearch(2,curr->v, index,connecs, m);
+      }
+    }
+    curr = curr->next;
+  }
+}
+
+static int hasSeen(LocationID* connections, int index, LocationID to){
+
+  if(index == -1) return FALSE; //hasn't seen anything yet
+  while(index >= 0){
+    if(connections[index] == to) return TRUE;
+    index--;
+  }
+  return FALSE;
+}
+
+//*************************
 
 // Add edges to Graph representing map of Europe
 static void addConnections(Map g)
