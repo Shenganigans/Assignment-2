@@ -18,7 +18,7 @@ DracView newDracView(char *pastPlays, PlayerMessage messages[])
 {
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
     DracView dracView = malloc(sizeof(struct dracView));
-    dracView->draculaView = newGameView(char *pastPlays, PlayerMessage messages[]);
+    dracView->draculaView = newGameView(pastPlays,messages[]);
     return dracView;
 }
 
