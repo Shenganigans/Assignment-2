@@ -12,6 +12,7 @@ struct dracView {
     GameView draculaView;
     LocationID dracTrail[TRAIL_SIZE];
     int traps[NUM_MAP_LOCATIONS]; 
+    int vamps[NUM_MAP_LOCATIONS]; 
     int location;
 };
 
@@ -64,11 +65,11 @@ LocationID whereIs(DracView currentView, PlayerID player)
 void lastMove(DracView currentView, PlayerID player,
                  LocationID *start, LocationID *end)
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATIO
+    
      char trail[TRAIL_SIZE];
      getHistory(currentView->draculaView, player, trail[TRAIL_SIZE]);
      end = trail[0];
-     start = trail[1];//REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+     start = trail[1];
     
 }
 
@@ -76,7 +77,7 @@ void lastMove(DracView currentView, PlayerID player,
 void whatsThere(DracView currentView, LocationID where,
                          int *numTraps, int *numVamps)
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+    
     return;
 }
 
