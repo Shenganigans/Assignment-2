@@ -294,6 +294,6 @@ LocationID *connectedLocations(GameView currentView, int *numLocations,
                                LocationID from, PlayerID player, Round round,
                                int road, int rail, int sea)
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return NULL;
+    return connecLocations(currentView, numLocations, from, player, round,
+                           road, rail, sea);
 }
