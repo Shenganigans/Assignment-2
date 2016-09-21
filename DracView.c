@@ -10,8 +10,10 @@
 
 struct dracView {
     GameView draculaView;
+    LocationID dracTrail[TRAIL_SIZE];
+    int traps[NUM_MAP_LOCATIONS]; 
+    int location;
 };
-
 
 // Creates a new DracView to summarise the current state of the game
 DracView newDracView(char *pastPlays, PlayerMessage messages[])
