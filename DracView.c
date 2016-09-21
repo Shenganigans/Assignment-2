@@ -62,8 +62,11 @@ LocationID whereIs(DracView currentView, PlayerID player)
 void lastMove(DracView currentView, PlayerID player,
                  LocationID *start, LocationID *end)
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return;
+    //REPLACE THIS WITH YOUR OWN IMPLEMENTATIOn
+    char trail[TRAIL_SIZE];
+    getHistory(currentView->draculaView, player, trail[TRAIL_SIZE]);
+    end = trail[0];
+    start = trail[1];
 }
 
 // Find out what minions are placed at the specified location
