@@ -18,7 +18,7 @@ DracView newDracView(char *pastPlays, PlayerMessage messages[])
 {
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
     DracView dracView = malloc(sizeof(struct dracView));
-    dracView->draculaView = newGameView(pastPlays,messages[]);
+    dracView->draculaView = newGameView(pastPlays,messages);
     return dracView;
 }
 
@@ -62,11 +62,8 @@ LocationID whereIs(DracView currentView, PlayerID player)
 void lastMove(DracView currentView, PlayerID player,
                  LocationID *start, LocationID *end)
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATIOn
-    char trail[TRAIL_SIZE];
-    getHistory(currentView->draculaView, player, trail[TRAIL_SIZE]);
-    end = trail[0];
-    start = trail[1];
+    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+    return;
 }
 
 // Find out what minions are placed at the specified location
@@ -83,7 +80,7 @@ void whatsThere(DracView currentView, LocationID where,
 void giveMeTheTrail(DracView currentView, PlayerID player,
                             LocationID trail[TRAIL_SIZE])
 {
-    getHistory(currentView->draculaView, player, trail[TRAIL_SIZE]);
+    getHistory(currentView->draculaView, player, &trail[TRAIL_SIZE]);
 }
 
 //// Functions that query the map to find information about connectivity
@@ -91,8 +88,8 @@ void giveMeTheTrail(DracView currentView, PlayerID player,
 // What are my (Dracula's) possible next moves (locations)
 LocationID *whereCanIgo(DracView currentView, int *numLocations, int road, int sea)
 {
-    return (connecLocations(currentView->draculaView, numLocations,
-                                 (getLocation(currentView->draculaView, PLAYER_DRACULA)), PLAYER_DRACULA , (Round(currentView->draculaView)),
+    return (connectedLocations(currentView->draculaView, numLocations,
+                                 (getLocation(currentView->draculaView, PLAYER_DRACULA)), PLAYER_DRACULA , (getRound(currentView->draculaView)),
                                  road, FALSE, sea));
 
 }
@@ -101,7 +98,7 @@ LocationID *whereCanIgo(DracView currentView, int *numLocations, int road, int s
 LocationID *whereCanTheyGo(DracView currentView, int *numLocations,
                            PlayerID player, int road, int rail, int sea)
 {
-  return (connecLocations(currentView->draculaView, numLocations,
-                               (getLocation(currentView->draculaView, player)), player , (Round(currentView->draculaView)),
+  return (connectedLocations(currentView->draculaView, numLocations,
+                               (getLocation(currentView->draculaView, player)), player , (getRound(currentView->draculaView)),
                                road, rail, sea));
 }
