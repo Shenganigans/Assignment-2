@@ -6,6 +6,7 @@
 #include "Game.h"
 #include "GameView.h"
 #include "DracView.h"
+#include <string.h>
 // #include "Map.h" ... if you decide to use the Map ADT
 #define CHARS_PER_TURN 8
 #define LOCATION_ABBREVIATION 1
@@ -18,8 +19,8 @@ static void insertdracTrailLoc (DracView dracView, LocationID placeID);
 struct dracView {
     GameView draculaView;
     LocationID dracTrail[TRAIL_SIZE];
-    int traps[NUM_MAP_LOCATIONS]; 
-    int vamps[NUM_MAP_LOCATIONS]; 
+    int traps[NUM_MAP_LOCATIONS];
+    int vamps[NUM_MAP_LOCATIONS];
     int location;
 };
 
@@ -31,7 +32,7 @@ DracView newDracView(char *pastPlays, PlayerMessage messages[])
     dracView->draculaView = newGameView(pastPlays, messages);
 
     int i, j;
-    for(i = 0; i < dracTrail_SIZE; i++) {
+    for(i = 0; i <8; i++) {
         dracView->dracTrail[i] = UNKNOWN_LOCATION;
     }
 
@@ -40,7 +41,7 @@ DracView newDracView(char *pastPlays, PlayerMessage messages[])
     }
     dracView->location = NOWHERE;
 
-    int past = strnlen(pastPlays, MAX_PAST_PLAY_LENGTH);
+    int past = strnlen(pastPlays, 7);
 
     for(i = 0; i < past; i += CHARS_PER_TURN) {
         PlayerID currPlayer = ( (i/CHARS_PER_TURN) % NUM_PLAYERS);
@@ -48,7 +49,7 @@ DracView newDracView(char *pastPlays, PlayerMessage messages[])
         if(!validPlace(currLoc)) {
             switch (pastPlays[i + LOCATION_ABBREVIATION]) {
 					 case 'H':
-						 currLoc = dracView->dracTrail[RECENT_LOCATION];
+						 currLoc = dracView->dracTrail[0];
 					    break;
 					 case 'T':
 					    currLoc = CASTLE_DRACULA;
@@ -71,7 +72,7 @@ DracView newDracView(char *pastPlays, PlayerMessage messages[])
                 dracView->location = currLoc;
             }
             if(pastPlays[i + DRACULA_ACTION] == 'M') {
-                dracView->traps[dracView->dracTrail[dracTrail_SIZE - 1]]--;
+                dracView->traps[dracView->dracTrail[8 - 1]]--;
             } else if(pastPlays[i + DRACULA_ACTION] == 'V') {
                 dracView->location = NOWHERE;
             }
@@ -132,12 +133,12 @@ LocationID whereIs(DracView currentView, PlayerID player)
 void lastMove(DracView currentView, PlayerID player,
                  LocationID *start, LocationID *end)
 {
-    
-     char trail[TRAIL_SIZE];
-     getHistory(currentView->draculaView, player, trail[TRAIL_SIZE]);
-     end = trail[0];
-     start = trail[1];
-    
+
+     int trail[TRAIL_SIZE];
+     getHistory(currentView->draculaView, player, &trail[TRAIL_SIZE]);
+     end = trail;
+     start = trail+1;
+
 }
 
 // Find out what minions are placed at the specified location
@@ -153,7 +154,7 @@ void whatsThere(DracView currentView, LocationID where,
         (*numVamps) = 0;
     }
 
-    (*numTraps) = currentView->trap[where];
+    (*numTraps) = currentView->traps[where];
 }
 
 //// Functions that return information about the history of the game
@@ -191,8 +192,8 @@ static void insertdracTrailLoc (DracView dracView, LocationID placeID) {
 
     int i;
     for(i = TRAIL_SIZE - 1; i >= 1; i--) {
-        dracView->trail[i] = dracView->trail[i-1];
+        dracView->dracTrail[i] = dracView->dracTrail[i-1];
     }
-    dracView->trail[0] = placeID;
+    dracView->dracTrail[0] = placeID;
     return;
 }
