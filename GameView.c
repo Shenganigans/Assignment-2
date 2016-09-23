@@ -12,7 +12,7 @@
 #define LOCATION_NAME_ABBREV 3
 #define MOST_RECENT 0
 #define PREVIOUS 1
-#define VAMP_MATURES 38
+#define VAMP_MATURES 38 // should be 19 as 13 + 6 as drac leaves vamp every 13 rounds, it matures in 6 more but changed cz of calc bs
 #define hasVampMatured(i) (i % VAMP_MATURES == 0)
 #define TRAP_OR_VAMP 2
 #define TRAP 0
@@ -20,23 +20,24 @@
 #define OLDEST_LOCATION 5
 
 struct gameView {
-    Round globalRound;
-    PlayerID currentPlayer;
-    int globalScore;
-    int globalHealth[NUM_PLAYERS];
-    LocationID trailOfLocations[NUM_PLAYERS][TRAIL_SIZE];
-    LocationID location[NUM_PLAYERS];
-    int minions[NUM_MAP_LOCATIONS][TRAP_OR_VAMP];
-    Map gameMap;
+    Round globalRound; // Current Game Round
+    PlayerID currentPlayer; // Current Player
+    int globalScore; // Current Game Score
+    int globalHealth[NUM_PLAYERS]; // Array storing healths of all the players
+    LocationID trailOfLocations[NUM_PLAYERS][TRAIL_SIZE]; // 2D array storing trails of every player
+    LocationID location[NUM_PLAYERS]; 
+    int minions[NUM_MAP_LOCATIONS][TRAP_OR_VAMP]; // to keep track of all traps and vamps in the game
+    Map gameMap; 
 };
 
+// helper functions
 static char *getLocationFromPastPlay (char *pastPlays, int i);
 static int playerName(char *pastPlays, int i);
 static GameView startingPlayerLocationAndHealth (GameView currentView);
 static GameView currentLocation (GameView currentView, char *locationID, int currentPlayer);
 static GameView actions (GameView currentView, int i, int currentPlayer, char *pastPlays);
 static GameView endOfRound (GameView currentView, int currentPlayer);
-static GameView locationUpdateInGV (GameView gameView, int locationID, int currentPlayer);
+static GameView locationUpdateInGV (GameView gameView, int locationID, int currentPlayer); // updating location in GameView
 
 // Creates a new GameView to summarise the current state of the game
 GameView newGameView(char *pastPlays, PlayerMessage messages[])
@@ -49,9 +50,10 @@ GameView newGameView(char *pastPlays, PlayerMessage messages[])
     int i, currentPlayer;
     startingPlayerLocationAndHealth(gameView);
     for (i = 0; pastPlays[i] != '\0'; i++) {
-        if (i % 8 == 0) currentPlayer = playerName(pastPlays, i);
+        if (i % 8 == 0) // every turn has 8 characters  
+            currentPlayer = playerName(pastPlays, i); // setting current player until turn is complete
         i++;
-        char *locationID = getLocationFromPastPlay(pastPlays, i);
+        char *locationID = getLocationFromPastPlay(pastPlays, i); // local version of LocationID
         i++;
         currentLocation(gameView, locationID, currentPlayer);
         for (i++; pastPlays[i] != ' ' && pastPlays[i+1] != '\0'; i++)
@@ -88,7 +90,7 @@ static GameView endOfRound (GameView gameView, int currentPlayer) {
                 gameView->globalHealth[currentPlayer] = GAME_START_HUNTER_LIFE_POINTS;
         }
     }
-    return gameView;
+    return gameView; // Return final changes to the game after every round
 }
 
 // changes game state according to actions performed in the pastPlays string
@@ -184,6 +186,7 @@ static GameView startingPlayerLocationAndHealth (GameView gameView) {
 }
 
 // extracts the player's location from the pastPlays string and returns the location's ID no.
+// uses the pastPlays string to get player location and return it
 static char *getLocationFromPastPlay(char *pastPlays, int i) {
     char *locationID = malloc(LOCATION_NAME_ABBREV*sizeof(char));
     locationID[0] = pastPlays[i];
@@ -250,7 +253,8 @@ void getHistory(GameView currentView, PlayerID player,
                             LocationID trailOfLocations[TRAIL_SIZE])
 {
     int i;
-    for (i = 0; i < TRAIL_SIZE; i++) trailOfLocations[i] = currentView->trailOfLocations[player][i];
+    for (i = 0; i < TRAIL_SIZE; i++) 
+        trailOfLocations[i] = currentView->trailOfLocations[player][i];
 }
 
 //// Functions that query the map to find information about connectivity
@@ -261,18 +265,15 @@ void getHistory(GameView currentView, PlayerID player,
 //   if the road, rail, sea parameters are TRUE.
 // The size of the array is stored in the variable pointed to by numLocations
 // The array can be in any order but must contain unique entries
-// Your function must take into account the globalRound and player id for rail travel
+// Your function must take into account the round and player id for rail travel
 // Your function must take into account that Dracula can't move to
 //   the hospital or travel by rail but need not take into account Dracula's trailOfLocations
 // The destination 'from' should be included in the array
 
 LocationID *connectedLocations(GameView currentView, int *numLocations,
-                               LocationID from, PlayerID player, Round globalRound,
+                               LocationID from, PlayerID player, Round round,
                                int road, int rail, int sea)
 {
-    LocationID *connected = malloc(sizeof(int)*NUM_MAP_LOCATIONS);
-    //*numLocations = fillConnections(currentView->gameMap, from, connected, player, globalRound, road, rail, sea);
-    // go through connected array and remove locationIDs that don't
-    // correspond to the road, rail and sea parameters
-    return connected;
+   
+    return connecLocations(currentView, numLocations, from, player, round, road, rail, sea);
 }
