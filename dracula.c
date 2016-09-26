@@ -6,6 +6,7 @@
 #include <string.h>
 #include "Game.h"
 #include "DracView.h"
+#include "Places.h"
 
 char* strategy (DracView gameState);
 int compareMoves (DracView gameState,LocationID draculaL,PlayerID hunter);
@@ -17,7 +18,7 @@ LocationID avoidSea (DracView gameState);
 void decideDraculaMove(DracView gameState)
 {
 	char* finalMove = strategy(gameState);
-	registerBestPlay(move,"Mwuhahahaha");
+	registerBestPlay(finalmove,"Mwuhahahaha");
 
 }
 
@@ -26,15 +27,15 @@ void decideDraculaMove(DracView gameState)
 char* strategy (DracView gameState)
 {
 	int *numLocations = NULL; // leaving it NULL to keep compiler happy, don't know what to put LOL
-	LocationID* avoidSea = whereCanIgo(gameState, numLocations, TRUE, FALSE);
+	LocationID* notSea = whereCanIgo(gameState, numLocations, TRUE, FALSE);
 	int seaAvoided = FALSE;
 	//try to avoid hunters AND sea
 	LocationID  bestMove;
 	int i;
 	LocationID currentLocation;
 	//attempts to find a location not in hunter's possible moves
-	for( i=0; i < strlen(*avoidSea);i++) { // can possibly be i < *numLocations
-		currentLocation = avoidSea[i];
+	for( i=0; i < *numLocations;i++) { 
+		currentLocation = notSea[i];
 		if (legalMove(gameState,currentLocation) == TRUE){
 			if (avoidHunter(gameState,currentLocation) == TRUE){
 				bestMove = currentLocation;
@@ -45,7 +46,7 @@ char* strategy (DracView gameState)
 	}
 	char * finalMove = malloc(sizeof(char)*3);
 
-	if (avoidHunter(gameState,currentLocation) == FALSE){
+	if (seaAvoided == FALSE){
 		//couldn't avoid hunter, avoid sea
 		if (avoidSea(gameState) != UNKNOWN_LOCATION){
 			finalMove = idToAbbrev(avoidSea(gameState));
@@ -85,17 +86,17 @@ LocationID anyLegalMove (DracView gameState)
 {
 	int *numLocations = NULL;
 	LocationID* dracPossibilities = whereCanIgo(gameState, numLocations, TRUE, TRUE);
-	LocationID legalMove = UNKNOWN_LOCATION;
+	LocationID legMove = UNKNOWN_LOCATION; // any legal move
 	LocationID curr;
 	int i;
 	for( i=0; i < *numLocations; i++){
 		curr = dracPossibilities[i];
 		if (legalMove(gameState,curr) == TRUE){
-			legalMove = curr;
+			legMove = curr;
 			break;
 		}
 	}
-	return legalMove;
+	return legMove;
 
 }
 
@@ -103,7 +104,7 @@ LocationID anyLegalMove (DracView gameState)
 int compareMoves (DracView gameState,LocationID currDrac,PlayerID hunter)
 {
 	int numLocations = 0; // not sure what value to give
-	LocationID* hunterPossibilites = whereCanTheyGo(gameState,numLocation, hunter,
+	LocationID* hunterPossibilites = whereCanTheyGo(gameState,numLocations, hunter,
 		TRUE, TRUE, TRUE);
 	int i;
 	int match = FALSE;
