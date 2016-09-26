@@ -14,12 +14,12 @@
 //366 is MAX Dracula turns
 #define MAX_TURNS (366*5)
 #define MAX_LENGTH ( MAX_TURNS * (NO_OF_ACTIONS_PER_TURN + 1) )
-     
+
 struct hunterView {
      GameView hunter;
      LocationID trailLocation[TRAIL_SIZE];
 };
-     
+
 
 // Creates a new HunterView to summarise the current state of the game
 HunterView newHunterView(char *pastPlays, PlayerMessage messages[])
@@ -68,8 +68,8 @@ HunterView newHunterView(char *pastPlays, PlayerMessage messages[])
     }
     return hunterView;
 }
-     
-     
+
+
 // Frees all memory previously allocated for the HunterView toBeDeleted
 void disposeHunterView(HunterView toBeDeleted)
 {
@@ -181,7 +181,7 @@ LocationID *whereCanTheyGo(HunterView currentView, int *numLocations,
                                                 turn, player, road,
                                                 FALSE, sea); // can't travel by rail
             } else {
-                possibilites = NULL; 
+                possibilites = NULL;
             }
         } else {
             possibilites = connectedLocations( currentView->hunter, numLocations,
