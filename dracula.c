@@ -7,6 +7,7 @@
 #include "Game.h"
 #include "DracView.h"
 #include "Places.h"
+#include "Map.h"
 
 char* strategy (DracView gameState);
 int compareMoves (DracView gameState,LocationID draculaL,PlayerID hunter);
@@ -18,7 +19,7 @@ LocationID avoidSea (DracView gameState);
 void decideDraculaMove(DracView gameState)
 {
 	char* finalMove = strategy(gameState);
-	registerBestPlay(finalmove,"Mwuhahahaha");
+	registerBestPlay(finalMove,"Mwuhahahaha");
 
 }
 
@@ -34,7 +35,7 @@ char* strategy (DracView gameState)
 	int i;
 	LocationID currentLocation;
 	//attempts to find a location not in hunter's possible moves
-	for( i=0; i < *numLocations;i++) { 
+	for( i=0; i < *numLocations;i++) {
 		currentLocation = notSea[i];
 		if (legalMove(gameState,currentLocation) == TRUE){
 			if (avoidHunter(gameState,currentLocation) == TRUE){
@@ -49,17 +50,17 @@ char* strategy (DracView gameState)
 	if (seaAvoided == FALSE){
 		//couldn't avoid hunter, avoid sea
 		if (avoidSea(gameState) != UNKNOWN_LOCATION){
-			finalMove = idToAbbrev(avoidSea(gameState));
+			finalMove = idToName(avoidSea(gameState));
 		//take any move if couldn't avoid either
 		} else if (anyLegalMove(gameState) != UNKNOWN_LOCATION){
-			finalMove = idToAbbrev(anyLegalMove(gameState));
+			finalMove = idToName(anyLegalMove(gameState));
 		//no legal moves
 		} else {
 			finalMove = "TP";
 		}
 	// both sea and hunter can be avoided
 	} else {
-		finalMove = idToAbbrev(bestMove);
+		finalMove = idToName(bestMove);
 	}
 	return finalMove;
 }
@@ -104,7 +105,7 @@ LocationID anyLegalMove (DracView gameState)
 int compareMoves (DracView gameState,LocationID currDrac,PlayerID hunter)
 {
 	int numLocations = 0; // not sure what value to give
-	LocationID* hunterPossibilites = whereCanTheyGo(gameState,numLocations, hunter,
+	LocationID* hunterPossibilites = whereCanTheyGo(gameState, &numLocations, hunter,
 		TRUE, TRUE, TRUE);
 	int i;
 	int match = FALSE;
@@ -151,7 +152,7 @@ int legalMove (DracView gameState, LocationID currentLocation)
 			flag++;
 		}
 	}
-	// checking for double back moves,etc. 
+	// checking for double back moves,etc.
 	if (flag == 0 && trail[0] != currentLocation){
 		legal = TRUE;
 	} else {
