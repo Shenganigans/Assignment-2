@@ -20,6 +20,6 @@ void decideHunterMove(HunterView gameState)
   LocationID *possiblePlaces = whereCanIgo(gameState, &numLocations,TRUE, TRUE, TRUE);
   int randomiser = rand()%(numLocations-1);
   LocationID place = possiblePlaces[randomiser];
-  char* randomPlace = idToName(place);
+  char* randomPlace = idToAbbrev(place);
   registerBestPlay(randomPlace,"This is random AI");
 }

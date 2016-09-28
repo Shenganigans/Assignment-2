@@ -97,6 +97,11 @@ char *idToName(LocationID p)
    assert(validPlace(p));
    return places[p].name;
 }
+char *idToAbbrev(LocationID p)
+{
+   assert(validPlace(p));
+   return places[p].abbrev;
+}
 
 // given a Place number, return its type
 int idToType(LocationID p)
