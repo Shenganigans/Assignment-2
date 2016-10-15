@@ -15,6 +15,7 @@
 
 struct hunterView {
     GameView game;
+    PlayerMessage *message;
 };
 
 
@@ -23,6 +24,7 @@ HunterView newHunterView(char *pastPlays, PlayerMessage messages[])
 {
     HunterView hunterView = malloc(sizeof(struct hunterView));
     hunterView->game = newGameView(pastPlays, messages);
+    hunterView->message = messages;
     return hunterView;
 }
 

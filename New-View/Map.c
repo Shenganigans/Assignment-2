@@ -24,10 +24,7 @@ struct MapRep {
 };
 
 static void addConnections(Map);
-static void addRail(Map europe, LocationID to, int railLength,
-                    LocationID *serial, int *numLocations);
-static int validity(TransportID type, int drac, int railLength, int road, int sea);
-static void addToSerial(LocationID to, LocationID *serial, int *numLocations);
+static void includeReachableByRail(Map map, int *reachable, LocationID from, int railLength);
 
 // Create a new empty graph (for a map)
 // #Vertices always same as NUM_PLACES
@@ -83,100 +80,63 @@ static int inVList(VList L, LocationID v, TransportID type)
     return 0;
 }
 
-LocationID *reachableLocations(Map europe, int *numLocations, LocationID from, int drac, int railLength, int road, int sea)
+LocationID *reachableLocations(Map map, int *numLocations, LocationID from, int drac, int railLength, int road, int sea)
 {
-    {
-  int temp;
-  VList current;
-  LocationID serial[NUM_MAP_LOCATIONS];
-  for(temp = 0; temp < NUM_MAP_LOCATIONS; temp++){
-    serial[temp] = FALSE;
-  }
-  addToSerial(from, serial, numLocations);
+    //a boolean for each location, if it is reachable
+    int *reachable = calloc(NUM_MAP_LOCATIONS,sizeof (int));
 
-  for(temp = 0; temp <= MAX_MAP_LOCATION; temp++){ //iterate throgh map
-    current = europe->connections[temp];
+    //setting the 'from' location as reachable
+    reachable[from] = 1;
 
-    if(temp == from){ // home
-      while(current != NULL){
-        if(validity(current->type, drac, railLength, road, sea)){
-          addToSerial(current->v, serial, numLocations);
-          if(current->type == RAIL && drac == FALSE && railLength > 1)
-            addRail(europe, current->v, railLength, serial, numLocations);
+    //for each connection that is by ROAD or SEA, set it to reachable
+    //if road or sea is set to true
+    VList cur;
+    TransportID type;
+    for (cur = map->connections[from]; cur != NULL; cur = cur->next) {
+        type = cur->type;
+        if ((type == ROAD && road) || (type == BOAT && sea)) {
+            reachable[cur->v] = 1;
         }
-        current = current->next;
-      }
-    } else { // away
-      while(current != NULL){
-        if(current->v == from && validity(current->type, drac, railLength, road, sea)){
-          addToSerial(temp, serial, numLocations);
-          if(current->type == RAIL && drac == FALSE && railLength > 1)
-            addRail(europe, temp, railLength, serial, numLocations);
-        }
-        current = current->next;
-      }
     }
-  }
-  if(drac == TRUE && serial[ST_JOSEPH_AND_ST_MARYS] == TRUE){
-    serial[ST_JOSEPH_AND_ST_MARYS] = FALSE;
-    (*numLocations)--;
-  }
 
-  LocationID *connected = malloc(sizeof(LocationID)*(*numLocations));
-  int i = 0;
-  for(temp = 0; temp <= MAX_MAP_LOCATION; temp++){
-    if(serial[temp] == 1) connected[i++] = temp;
-  }
+    //include the places reachable by rail
+    includeReachableByRail(map, reachable, from, railLength);
 
-  return connected;
-}
-
-static void addToSerial(LocationID to, LocationID *serial, int *numLocations){
-  printf("%s ", idToName(to));
-  if(serial[to] == FALSE) {
-    (*numLocations)++;
-    serial[to] = TRUE;
-  }
-
-}
-
-static int validity(TransportID type, int drac, int railLength, int road, int sea){
-  if((type == ROAD && road == TRUE) ||
-    (type == BOAT && sea == TRUE)  ||
-    (type == RAIL && (railLength > 0) && drac == FALSE)) return TRUE;
-  return FALSE;
-}
-
-static void addRail(Map europe, LocationID from, int railLength,
-                    LocationID *serial, int *numLocations){
-  if(railLength < 2) return;
-  int temp;
-  VList current;
-
-  for(temp = 0; temp <= MAX_MAP_LOCATION; temp++){ //iterate throgh map
-    current = europe->connections[temp];
-
-    if(temp == from){ // home
-      while(current != NULL){
-        if(current->type == RAIL){
-          addToSerial(current->v, serial, numLocations);
-          if(railLength == 3) addRail(europe, current->v, 2, serial, numLocations);
+    //going through and putting every reachable LocationID into an array
+    LocationID *locations = malloc(NUM_MAP_LOCATIONS * sizeof (LocationID));
+    int i, index = 0;
+    for (i = 0; i < NUM_MAP_LOCATIONS; i++) {
+        //don't allow dracula to go to the hospital
+        if (reachable[i]) {
+            if (!(drac && i == ST_JOSEPH_AND_ST_MARYS)) {
+                locations[index] = i;
+                index++;
+            }
         }
-        current = current->next;
-      }
-    } else { // away
-      while(current != NULL){
-        if(current->v == from && current->type == RAIL){
-          addToSerial(temp, serial, numLocations);
-          if(railLength == 3) addRail(europe, temp, 2, serial, numLocations);
-        }
-        current = current->next;
-      }
     }
-  }
+    free(reachable);
 
+    //setting the number of locations actually returned
+    *numLocations = index;
+
+    return locations;
 }
 
+static void includeReachableByRail(Map map, int *reachable, LocationID from, int railLength)
+{
+    assert(railLength >= 0);
+
+    reachable[from] = 1;
+
+    if (railLength > 0) {
+        VList cur;
+        for (cur = map->connections[from]; cur != NULL; cur = cur->next) {
+            if (cur->type == RAIL) {
+                includeReachableByRail(map, reachable, cur->v, railLength - 1);
+            }
+        }
+    }
+}
 
 // Add a new edge to the Map/Graph
 void addLink(Map g, LocationID start, LocationID end, TransportID type)
