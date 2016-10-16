@@ -8,7 +8,7 @@ BINS = dracula hunter
 # add any other *.o files that your system requires
 # (and add their dependencies below after DracView.o)
 # if you're not using Map.o or Places.o, you can remove them
-OBJS = GameView.o Map.o Places.o
+OBJS = GameView.o Map.o Places.o Queue.o Graph.o
 # add whatever system libraries you need here (e.g. -lm)
 LIBS = -lm
 
@@ -31,6 +31,7 @@ GameView.o : GameView.c Globals.h GameView.h
 HunterView.o : HunterView.c Globals.h HunterView.h
 DracView.o : DracView.c Globals.h DracView.h
 # if you use other ADTs, add dependencies for them here
-
+Queue.o : Queue.h Queue.c Item.h
+Graph.o : Graph.c Graph.h
 clean :
 	rm -f $(BINS) *.o core

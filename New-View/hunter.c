@@ -6,12 +6,14 @@
 #include "Game.h"
 #include "HunterView.h"
 #include "Map.h"
+#include <string.h>
+#include "Queue.h"
 #include <time.h>
 #include <math.h>
 #define REST 1
 #define DONT_REST 0
 int shouldWeRest(HunterView gameState, LocationID *lastKnownDracLoc, LocationID *trail);
-
+int findShortestPath(HunterView gameState, LocationID from, LocationID dest, LocationID *path);
 void decideHunterMove(HunterView gameState)
 {
   PlayerID me = whoAmI(gameState);
@@ -26,6 +28,7 @@ void decideHunterMove(HunterView gameState)
   time_t t;
   srand((unsigned) time(&t));
   int numLocations;
+  LocationID *shortestPath;//shortest path to latest drac known sighting
 //When the game just starts
   if(giveMeTheRound(gameState)==0){
     if(whoAmI(gameState)==0){
@@ -37,6 +40,8 @@ void decideHunterMove(HunterView gameState)
     }
     return;
   }
+  //get shortest path
+  int numberMoves = findShortestPath(gameState, whereIs(gameState, whoAmI(gameState)), lastKnownDracLoc, shortestPath);
   //random moves
   LocationID *possiblePlaces = whereCanIgo(gameState, &numLocations,TRUE, TRUE, TRUE);
   int randomiser = rand()%(numLocations-1);
@@ -77,29 +82,31 @@ int shouldWeRest(HunterView gameState, LocationID *lastKnownDracLoc, LocationID 
   }
   return REST;
 }
-int findShortestPath(HunterView gameState, LocationID from, LocationID dest, LocationID *path)//untested, need queue.c.h from week 9 lab
+int findShortestPath(HunterView gameState, LocationID from, LocationID dest, LocationID *path)//untested
 {
         int seen[71];
         memset(seen,-1,sizeof(seen));
         int curr;
+        int currRail;
         int counter = 0;
         Queue nodes = newQueue();
         Queue train = newQueue();
         Map m = newMap();
         QueueJoin(nodes,from);
-        int travel = (whoAmI(gameState)+giveMeTheRound(gameState))%4
+        int travel = (whoAmI(gameState)+giveMeTheRound(gameState))%4;
         QueueJoin(train, travel);
-        int numLocations
-        while(!QueueIsEmpty(q)){
+        int numLocations;
+        while(!QueueIsEmpty(nodes)){
                 curr = QueueLeave(nodes);
                 currRail = QueueLeave(train);
-                LocationID *possiblepaths = reachableLocations(map, &numLocations, curr, FALSE, currRail, TRUE, TRUE);
-                while(counter < 71){
-                        if(seen[counter] == -1){
-                                  QueueJoin(nodes,counter);
-                                  QueueJoin(train,(currRail+1)%4)
+                LocationID *possiblepaths = reachableLocations(m, &numLocations, curr, FALSE, currRail, TRUE, TRUE);
+                while(counter < numLocations){
+
+                          if(seen[counter] == -1){
+                                  QueueJoin(nodes,possiblepaths[counter]);
+                                  QueueJoin(train,(currRail+1)%4);
                                   seen[counter] = curr;
-                        }
+                          }
 
                         counter++;
                 }
