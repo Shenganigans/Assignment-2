@@ -42,6 +42,7 @@ void decideHunterMove(HunterView gameState)
   }
   //get shortest path
   int numberMoves = findShortestPath(gameState, whereIs(gameState, whoAmI(gameState)), lastKnownDracLoc, shortestPath);
+  //TODO (actually use the function)
   //random moves
   LocationID *possiblePlaces = whereCanIgo(gameState, &numLocations,TRUE, TRUE, TRUE);
   int randomiser = rand()%(numLocations-1);
