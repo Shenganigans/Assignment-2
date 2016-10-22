@@ -108,6 +108,9 @@ void getMinions(GameView game, LocationID where, int *numTraps, int *numVamps);
 void getHistory(GameView currentView, PlayerID player,
                  LocationID trail[TRAIL_SIZE]);
 
+void getExtendedHistory(GameView currentView, PlayerID player,
+  LocationID trail[TRAIL_SIZE + 1]);
+
 
 //// Functions that query the map to find information about connectivity
 

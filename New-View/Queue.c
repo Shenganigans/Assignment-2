@@ -1,4 +1,4 @@
-// Queue.c ... implementation of Queue ADT
+	// Queue.c ... implementation of Queue ADT
 // Written by John Shepherd, March 2013
 
 #include <stdlib.h>

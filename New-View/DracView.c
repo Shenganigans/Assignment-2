@@ -32,11 +32,11 @@ static void setMyTrail(char *pastPlays, LocationID *myTrail)
         LocationID realLoc;
         if      (p[1] == 'T' && p[2] == 'P') realLoc = CASTLE_DRACULA;
         else if (p[1] == 'H' && p[2] == 'I') realLoc = myTrail[0];
-        else if (p[1] == 'D' && p[2] == '1') realLoc = myTrail[1];
-        else if (p[1] == 'D' && p[2] == '2') realLoc = myTrail[2];
-        else if (p[1] == 'D' && p[2] == '3') realLoc = myTrail[3];
-        else if (p[1] == 'D' && p[2] == '4') realLoc = myTrail[4];
-        else if (p[1] == 'D' && p[2] == '5') realLoc = myTrail[5];
+        else if (p[1] == 'D' && p[2] == '1') realLoc = myTrail[0];
+        else if (p[1] == 'D' && p[2] == '2') realLoc = myTrail[1];
+        else if (p[1] == 'D' && p[2] == '3') realLoc = myTrail[2];
+        else if (p[1] == 'D' && p[2] == '4') realLoc = myTrail[3];
+        else if (p[1] == 'D' && p[2] == '5') realLoc = myTrail[4];
         else {
             // must be a real location
             char place[3] = { p[1], p[2], '\0' };
@@ -167,14 +167,27 @@ static int onTrail(LocationID *trail, LocationID loc)
 // What are my (Dracula's) possible next moves (locations)
 LocationID *whereCanIgo(DracView currentView, int *numLocations, int road, int sea)
 {
+
+//    printf("Dracula's current position is: %d\n", getLocation(currentView->game, PLAYER_DRACULA));
+//    for (int l = 0; l < 7; l++) {
+//        printf("Dracula's trail is: %d, trail no. is %d\n", currentView->myTrail[l], l);
+//    }
+//    printf("This runs\n");
     LocationID *locations =
         connectedLocations(currentView->game,
                            numLocations,
-                           currentView->myTrail[0],
+                           getLocation(currentView->game, PLAYER_DRACULA),
                            PLAYER_DRACULA,
                            getRound(currentView->game),
                            road, FALSE, sea);
-
+/*
+                           connectedLocations(currentView->game,
+                                              numLocations,
+                                              currentView->myTrail[0],
+                                              PLAYER_DRACULA,
+                                              getRound(currentView->game),
+                                              road, FALSE, sea);*/
+//printf("This runs2\n");
     // find any locations that are not allowed (e.g. hospital or in trail)
     // connectedLocations() actually removes the hospital
     // ... checking again here provides some safety and also some documentation

@@ -12,6 +12,7 @@
 #include "Map.h"
 
 #define TURN_LENGTH 8
+    #define EXTENDED_TRAIL_SIZE 8
 
 // Encounterable items in cities
 #define MAX_TRAPS 3
@@ -38,7 +39,7 @@ struct gameView {
     int bloodPts;
 
     //these are all typedefed as ints
-    LocationID locHistory[NUM_PLAYERS][TRAIL_SIZE];
+    LocationID locHistory[NUM_PLAYERS][EXTENDED_TRAIL_SIZE];
     Round round;
     PlayerID currPlayer;
 
@@ -103,7 +104,7 @@ GameView newGameView(char *pastPlays, PlayerMessage messages[])
     view->bloodPts = GAME_START_BLOOD_POINTS;
 
     for (i = 0; i < NUM_PLAYERS; i++)
-        for (j = 0; j < TRAIL_SIZE; j++)
+        for (j = 0; j < EXTENDED_TRAIL_SIZE; j++)
             view->locHistory[i][j] = NOWHERE;
 
     for (i=0; i < NUM_MAP_LOCATIONS; i++ ) {
@@ -241,11 +242,11 @@ GameView newGameView(char *pastPlays, PlayerMessage messages[])
         int city;
         for (city=0; city < NUM_MAP_LOCATIONS; city++) {
             for (i=0; i< MAX_TRAPS; i++) {
-                if ( view->cities[city].trap[i] < turn - ((TRAIL_SIZE-1)*NUM_PLAYERS) ) {
+                if ( view->cities[city].trap[i] < turn - ((EXTENDED_TRAIL_SIZE-1)*NUM_PLAYERS) ) {
                     view->cities[city].trap[i] = NO_ITEM;
                 }
             }
-            if ( view->cities[city].vamp < turn - ((TRAIL_SIZE-1)*NUM_PLAYERS) ) {
+            if ( view->cities[city].vamp < turn - ((EXTENDED_TRAIL_SIZE-1)*NUM_PLAYERS) ) {
                 view->cities[city].vamp = NO_ITEM;
             }
         }
@@ -291,7 +292,7 @@ static void addLocation (GameView view, PlayerID player, LocationID newLoc)
     //assert(validPlace(from));
 
     int i;
-    for (i = TRAIL_SIZE-1; i > 0; i--) {
+    for (i = EXTENDED_TRAIL_SIZE-1; i > 0; i--) {
         view->locHistory[player][i] = view->locHistory[player][i-1];
     }
     view->locHistory[player][0] = newLoc;
@@ -422,6 +423,19 @@ void getHistory(GameView currentView, PlayerID player, LocationID trail[TRAIL_SI
         trail[i] = currentView->locHistory[player][i];
     }
 }
+
+//Fills the trail array with the location ids of the last 7 turns
+void getExtendedHistory(GameView currentView, PlayerID player,
+                        LocationID trail[EXTENDED_TRAIL_SIZE])
+{
+    //goes through the locHistory[] for that player and copies it to trail[]
+    assert(validPlayer(player));
+    int i;
+    for (i = 0; i < EXTENDED_TRAIL_SIZE; i++) {
+        trail[i] = currentView->locHistory[player][i];
+    }
+}
+
 
 
 //// Functions that query the map to find information about connectivity

@@ -15,7 +15,6 @@
 
 struct hunterView {
     GameView game;
-    PlayerMessage *message;
 };
 
 
@@ -24,7 +23,6 @@ HunterView newHunterView(char *pastPlays, PlayerMessage messages[])
 {
     HunterView hunterView = malloc(sizeof(struct hunterView));
     hunterView->game = newGameView(pastPlays, messages);
-    hunterView->message = messages;
     return hunterView;
 }
 
@@ -76,6 +74,12 @@ void giveMeTheTrail(HunterView currentView, PlayerID player,
                     LocationID trail[TRAIL_SIZE])
 {
     getHistory(currentView->game, player, trail);
+}
+
+void giveMeTheExtendedTrail(HunterView currentView, PlayerID player,
+                    LocationID trail[EXTENDED_TRAIL_SIZE])
+{
+    getExtendedHistory(currentView->game, player, trail);
 }
 
 //// Functions that query the map to find information about connectivity

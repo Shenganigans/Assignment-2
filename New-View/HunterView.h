@@ -8,6 +8,8 @@
 #include "Game.h"
 #include "Places.h"
 
+#define EXTENDED_TRAIL_SIZE 8
+
 typedef struct hunterView *HunterView;
 
 // newHunterView() creates a new game view to summarise the current state of
@@ -85,6 +87,8 @@ LocationID whereIs(HunterView currentView, PlayerID player);
 void giveMeTheTrail(HunterView currentView, PlayerID player,
                         LocationID trail[TRAIL_SIZE]);
 
+void giveMeTheExtendedTrail(HunterView currentView, PlayerID player,
+                            LocationID trail[EXTENDED_TRAIL_SIZE]);
 
 //// Functions that query the map to find information about connectivity
 
