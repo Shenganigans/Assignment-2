@@ -37,6 +37,11 @@ char* strategy (DracView gameState)
 		finalMove = "ZU";
 		return finalMove;
 	}
+	if (whereIs(gameState, PLAYER_DRACULA) == abbrevToID("CD")) {
+		if (legalMove(gameState, whereIs(gameState, PLAYER_DRACULA)) == TRUE) {
+			finalMove = "KL";
+		}
+	}
 	//Dracula's available moves
 //	printf("Round 2 onwards\n");
 	LocationID* notSea = whereCanIgo(gameState, &numLocations, TRUE, FALSE);
@@ -44,7 +49,6 @@ char* strategy (DracView gameState)
 	printf("%d numlocations\n", numLocations);
 	for (i = 0; i < numLocations; i++) {
 		currentLocation = notSea[i];
-
 
 		char *string1 = idToAbbrev(notSea[i]);
 	       printf("%s ", string1);
